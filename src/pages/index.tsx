@@ -14,7 +14,7 @@ const client = new ApolloClient({
 	cache: new InMemoryCache(),
 });
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
 	let data = null;
 	await client
 		.query({
@@ -41,7 +41,13 @@ export default function Home({ dataList }: any) {
 	// create an array of elements that you want to animate
 	var elements = typeof window !== 'undefined' ? document.querySelectorAll('.element') : undefined;
 
-	const [activeSlide, setActiveSlide] = useState<Element | null>(null);
+	const [activeSlide, setActiveSlide] = useState<any>({
+		active: null,
+		prev: null,
+		prevRez: null,
+		next: null,
+		nextRez: null,
+	});
 
 	useEffect(() => {
 		console.log('activeSlide    ', activeSlide);
@@ -51,7 +57,13 @@ export default function Home({ dataList }: any) {
 	useEffect(() => {
 		elements?.forEach(element => {
 			if (element.getAttribute('class') === 'swiper-slide element swiper-slide-active') {
-				setActiveSlide(element);
+				setActiveSlide({
+					active: element,
+					prev: activeSlide.prev,
+					prevRez: activeSlide.prevRez,
+					next: activeSlide.next,
+					nextRez: activeSlide.nextRez,
+				});
 			}
 			// // right
 			// if (element.getAttribute('aria-index') === `${activeSlide - 1}`) {
@@ -72,54 +84,84 @@ export default function Home({ dataList }: any) {
 			// 	element.style.transform = 'translate(-50%, 0)';
 			// }
 		});
-	}, [elements]);
+	}, []);
 
 	useEffect(() => {
-		if (activeSlide !== null) {
-			//@ts-ignore
-			activeSlide.style.opacity = '0.8';
-			console.log('111    ', 111);
-		}
-		elements?.forEach(element => {
-			if (
-				Number(activeSlide?.getAttribute('data-swiper-slide-index')) - 1 ===
-				Number(element.getAttribute('data-swiper-slide-index'))
-			) {
-				//@ts-ignore
-				element.style.opacity = '0.5';
-				//@ts-ignore
-				element.style.left = '14%';
-			}
-			if (
-				Number(activeSlide?.getAttribute('data-swiper-slide-index')) + 1 ===
-				Number(element.getAttribute('data-swiper-slide-index'))
-			) {
-				//@ts-ignore
-				element.style.opacity = '0.5';
-				//@ts-ignore
-				element.style.left = '-14%';
-			}
+		setTimeout(() => {
+			elements?.forEach(element => {
+				if (
+					Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) - 1 ===
+					Number(element.getAttribute('data-swiper-slide-index'))
+				) {
+					// //@ts-ignore
+					// element.style.opacity = '0.5';
+					// //@ts-ignore
+					// element.style.left = '14%';
+					console.log('element    ', element);
 
-			if (
-				Number(activeSlide?.getAttribute('data-swiper-slide-index')) - 2 ===
-				Number(element.getAttribute('data-swiper-slide-index'))
-			) {
-				//@ts-ignore
-				element.style.opacity = '0.1';
-				//@ts-ignore
-				element.style.left = '28%';
-			}
-			if (
-				Number(activeSlide?.getAttribute('data-swiper-slide-index')) + 2 ===
-				Number(element.getAttribute('data-swiper-slide-index'))
-			) {
-				//@ts-ignore
-				element.style.opacity = '0.1';
-				//@ts-ignore
-				element.style.left = '-28%';
-			}
-		});
-	}, [activeSlide]);
+					setActiveSlide({
+						active: activeSlide.active,
+						prev: element,
+						prevRez: activeSlide.prevRez,
+						next: activeSlide.next,
+						nextRez: activeSlide.nextRez,
+					});
+				}
+				if (
+					Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) + 1 ===
+					Number(element.getAttribute('data-swiper-slide-index'))
+				) {
+					// //@ts-ignore
+					// element.style.opacity = '0.5';
+					// //@ts-ignore
+					// element.style.left = '-14%';
+
+					setActiveSlide({
+						active: activeSlide.active,
+						prev: activeSlide.prev,
+						prevRez: activeSlide.prevRez,
+						next: element,
+						nextRez: activeSlide.nextRez,
+					});
+				}
+
+				if (
+					Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) - 2 ===
+					Number(element.getAttribute('data-swiper-slide-index'))
+				) {
+					// //@ts-ignore
+					// element.style.opacity = '0.1';
+					// //@ts-ignore
+					// element.style.left = '28%';
+
+					setActiveSlide({
+						active: activeSlide.active,
+						prev: activeSlide.prev,
+						prevRez: element,
+						next: activeSlide.next,
+						nextRez: activeSlide.nextRez,
+					});
+				}
+				if (
+					Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) + 2 ===
+					Number(element.getAttribute('data-swiper-slide-index'))
+				) {
+					// //@ts-ignore
+					// element.style.opacity = '0.1';
+					// //@ts-ignore
+					// element.style.left = '-28%';
+
+					setActiveSlide({
+						active: activeSlide.active,
+						prev: activeSlide.prev,
+						prevRez: activeSlide.prevRez,
+						next: activeSlide.next,
+						nextRez: element,
+					});
+				}
+			});
+		}, 500);
+	}, []);
 
 	// create a timeline to animate the elements
 	var tl = new TimelineMax();
@@ -140,7 +182,7 @@ export default function Home({ dataList }: any) {
 		// 	);
 		// });
 		tl.to(
-			activeSlide,
+			activeSlide.active,
 			1,
 			{
 				left: '-30%',
@@ -149,9 +191,8 @@ export default function Home({ dataList }: any) {
 			},
 			stagger,
 		);
+		gsap.registerPlugin();
 	});
-
-	gsap.registerPlugin();
 
 	const onClick = useCallback(() => {
 		addUser({
