@@ -56,7 +56,10 @@ export default function Home({ dataList }: any) {
 	// set the initial position of all elements to the same point
 	useEffect(() => {
 		elements?.forEach(element => {
-			if (element.getAttribute('class') === 'swiper-slide element swiper-slide-active') {
+			if (
+				activeSlide.active === null &&
+				element.getAttribute('class') === 'swiper-slide element swiper-slide-active'
+			) {
 				setActiveSlide({
 					active: element,
 					prev: activeSlide.prev,
@@ -64,6 +67,8 @@ export default function Home({ dataList }: any) {
 					next: activeSlide.next,
 					nextRez: activeSlide.nextRez,
 				});
+				//@ts-ignore
+				element.style.height = '0';
 			}
 			// // right
 			// if (element.getAttribute('aria-index') === `${activeSlide - 1}`) {
@@ -87,81 +92,83 @@ export default function Home({ dataList }: any) {
 	}, []);
 
 	useEffect(() => {
-		setTimeout(() => {
-			elements?.forEach(element => {
-				if (
-					Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) - 1 ===
+		elements?.forEach(element => {
+			if (
+				activeSlide.prev === null &&
+				Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) - 1 ===
 					Number(element.getAttribute('data-swiper-slide-index'))
-				) {
-					// //@ts-ignore
-					// element.style.opacity = '0.5';
-					// //@ts-ignore
-					// element.style.left = '14%';
-					console.log('element    ', element);
+			) {
+				//@ts-ignore
+				element.style.opacity = '0.5';
+				//@ts-ignore
+				element.style.left = '14%';
+				console.log('element    ', element);
 
-					setActiveSlide({
-						active: activeSlide.active,
-						prev: element,
-						prevRez: activeSlide.prevRez,
-						next: activeSlide.next,
-						nextRez: activeSlide.nextRez,
-					});
-				}
-				if (
-					Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) + 1 ===
+				setActiveSlide({
+					active: activeSlide.active,
+					prev: element,
+					prevRez: activeSlide.prevRez,
+					next: activeSlide.next,
+					nextRez: activeSlide.nextRez,
+				});
+			}
+			if (
+				activeSlide.next === null &&
+				Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) + 1 ===
 					Number(element.getAttribute('data-swiper-slide-index'))
-				) {
-					// //@ts-ignore
-					// element.style.opacity = '0.5';
-					// //@ts-ignore
-					// element.style.left = '-14%';
+			) {
+				//@ts-ignore
+				element.style.opacity = '0.5';
+				//@ts-ignore
+				element.style.left = '-14%';
 
-					setActiveSlide({
-						active: activeSlide.active,
-						prev: activeSlide.prev,
-						prevRez: activeSlide.prevRez,
-						next: element,
-						nextRez: activeSlide.nextRez,
-					});
-				}
+				setActiveSlide({
+					active: activeSlide.active,
+					prev: activeSlide.prev,
+					prevRez: activeSlide.prevRez,
+					next: element,
+					nextRez: activeSlide.nextRez,
+				});
+			}
 
-				if (
-					Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) - 2 ===
+			if (
+				activeSlide.prevRez === null &&
+				Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) - 2 ===
 					Number(element.getAttribute('data-swiper-slide-index'))
-				) {
-					// //@ts-ignore
-					// element.style.opacity = '0.1';
-					// //@ts-ignore
-					// element.style.left = '28%';
+			) {
+				//@ts-ignore
+				element.style.opacity = '0.1';
+				//@ts-ignore
+				element.style.left = '28%';
 
-					setActiveSlide({
-						active: activeSlide.active,
-						prev: activeSlide.prev,
-						prevRez: element,
-						next: activeSlide.next,
-						nextRez: activeSlide.nextRez,
-					});
-				}
-				if (
-					Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) + 2 ===
+				setActiveSlide({
+					active: activeSlide.active,
+					prev: activeSlide.prev,
+					prevRez: element,
+					next: activeSlide.next,
+					nextRez: activeSlide.nextRez,
+				});
+			}
+			if (
+				activeSlide.nextRez === null &&
+				Number(activeSlide.active?.getAttribute('data-swiper-slide-index')) + 2 ===
 					Number(element.getAttribute('data-swiper-slide-index'))
-				) {
-					// //@ts-ignore
-					// element.style.opacity = '0.1';
-					// //@ts-ignore
-					// element.style.left = '-28%';
+			) {
+				//@ts-ignore
+				element.style.opacity = '0.1';
+				//@ts-ignore
+				element.style.left = '-28%';
 
-					setActiveSlide({
-						active: activeSlide.active,
-						prev: activeSlide.prev,
-						prevRez: activeSlide.prevRez,
-						next: activeSlide.next,
-						nextRez: element,
-					});
-				}
-			});
-		}, 500);
-	}, []);
+				setActiveSlide({
+					active: activeSlide.active,
+					prev: activeSlide.prev,
+					prevRez: activeSlide.prevRez,
+					next: activeSlide.next,
+					nextRez: element,
+				});
+			}
+		});
+	}, [elements]);
 
 	// create a timeline to animate the elements
 	var tl = new TimelineMax();
@@ -185,7 +192,48 @@ export default function Home({ dataList }: any) {
 			activeSlide.active,
 			1,
 			{
-				left: '-30%',
+				height: '100%',
+				opacity: 1,
+				ease: Power2.easeOut,
+			},
+			stagger,
+		);
+
+		tl.to(
+			activeSlide.prev,
+			1,
+			{
+				left: '0',
+				opacity: 1,
+				ease: Power2.easeOut,
+			},
+			stagger,
+		);
+		tl.to(
+			activeSlide.next,
+			1,
+			{
+				left: '0',
+				opacity: 1,
+				ease: Power2.easeOut,
+			},
+			stagger,
+		);
+		tl.to(
+			activeSlide.prevRez,
+			1,
+			{
+				left: '0',
+				opacity: 1,
+				ease: Power2.easeOut,
+			},
+			stagger,
+		);
+		tl.to(
+			activeSlide.nextRez,
+			1,
+			{
+				left: '0',
 				opacity: 1,
 				ease: Power2.easeOut,
 			},
